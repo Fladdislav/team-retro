@@ -127,19 +127,17 @@
     });
   }
 
-  // Connect Socket.IO
-  function initSocket() {
-    socket = io();
-
-    socket.on('connect', () => {
-      console.log('Connected to server via WebSocket');
-      socket.emit('join-room', {
+  // Attach network event handlers to transport (Socket.IO or WebRTC)
+  function attachNetworkHandlers(sock) {
+    sock.on('connect', () => {
+      console.log('Connected to room transport');
+      sock.emit('join-room', {
         roomId,
         user: currentUser
       });
     });
 
-    socket.on('room-init', (data) => {
+    sock.on('room-init', (data) => {
       currentRoom = data.room;
       stagesList = data.stages || [];
       availableTagsList = data.availableTags || [];
@@ -151,7 +149,7 @@
       updateBlurButtonUI();
     });
 
-    socket.on('room-updated', (room) => {
+    sock.on('room-updated', (room) => {
       currentRoom = room;
       updateHeaderUI();
       renderStages();
@@ -173,36 +171,78 @@
       }
     });
 
-    socket.on('participants-updated', (participants) => {
+    sock.on('participants-updated', (participants) => {
       renderParticipants(participants);
     });
 
-    socket.on('timer-tick', (timer) => {
+    sock.on('timer-tick', (timer) => {
       if (currentRoom) currentRoom.timer = timer;
       updateTimerUI(timer);
     });
 
-    socket.on('timer-ended', () => {
+    sock.on('timer-ended', () => {
       if (window.soundEngine) window.soundEngine.playTimerEnd();
       window.showToast('⏱️ Время этапа истекло!', 'warning');
     });
 
-    socket.on('sound-event', (evt) => {
+    sock.on('sound-event', (evt) => {
       if (!window.soundEngine) return;
       if (evt.type === 'card-added') window.soundEngine.playPop();
       if (evt.type === 'vote-added') window.soundEngine.playVote();
       if (evt.type === 'action-added') window.soundEngine.playPop();
     });
 
-    socket.on('confetti-fired', (data) => {
+    sock.on('confetti-fired', (data) => {
       if (window.confettiLauncher) window.confettiLauncher.fire(160);
       if (window.soundEngine) window.soundEngine.playFanfare();
       window.showToast(`🎉 ${data.senderName || 'Команда'} празднует завершение!`, 'success');
     });
 
-    socket.on('notification', (data) => {
+    sock.on('notification', (data) => {
       window.showToast(data.message, data.type || 'info');
     });
+  }
+
+  // Connect Transport (WebRTC P2P on GitHub Pages / Static, Socket.IO on Node Server)
+  function initSocket() {
+    const isGitHubPages = window.location.hostname.includes('github.io');
+
+    // On GitHub Pages, use WebRTC P2P immediately
+    if (isGitHubPages && window.WebRtcRetroSync) {
+      console.log('🚀 Running on GitHub Pages: using WebRTC P2P transport');
+      socket = new window.WebRtcRetroSync(roomId, currentUser);
+      attachNetworkHandlers(socket);
+      socket.connect();
+      return;
+    }
+
+    // Otherwise, try Socket.IO with fallback to WebRTC P2P
+    try {
+      if (typeof io !== 'undefined') {
+        socket = io({ timeout: 3000, reconnectionAttempts: 2 });
+        attachNetworkHandlers(socket);
+
+        socket.on('connect_error', () => {
+          console.warn('⚠️ Socket.IO server unavailable. Switching to WebRTC P2P mode...');
+          if (window.WebRtcRetroSync && !(socket instanceof window.WebRtcRetroSync)) {
+            try { socket.disconnect(); } catch (e) {}
+            socket = new window.WebRtcRetroSync(roomId, currentUser);
+            attachNetworkHandlers(socket);
+            socket.connect();
+          }
+        });
+        return;
+      }
+    } catch (e) {
+      console.warn('Socket.IO init failed:', e);
+    }
+
+    // Direct WebRTC fallback
+    if (window.WebRtcRetroSync) {
+      socket = new window.WebRtcRetroSync(roomId, currentUser);
+      attachNetworkHandlers(socket);
+      socket.connect();
+    }
   }
 
   // Header UI Updates

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Team Retro — Командные ретроспективы в реальном времени</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/modal.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header">
+    <a href="/" class="logo-container">
+      <div class="logo-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+        </svg>
+      </div>
+      <span class="logo-text">Team Retro</span>
+    </a>
+    <div class="header-actions">
+      <button id="theme-toggle" class="btn btn-ghost btn-icon" title="Переключить тему">
+        <span id="theme-icon">☀️</span>
+      </button>
+      <a href="#templates" class="btn btn-ghost btn-sm">Шаблоны</a>
+      <a href="#features" class="btn btn-ghost btn-sm">Возможности</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="landing-container">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-badge">⚡ Real-time ретро для agile-команд</div>
+      <h1>Проводите ретроспективы,<br>которые <span>меняют процессы</span></h1>
+      <p>Совместный сбор мыслей, приватный режим без предвзятости, точечное голосование, встроенный таймер и четкий план действий.</p>
+    </section>
+
+    <!-- Create / Join Grid -->
+    <div class="create-grid">
+      <!-- Create Room Box -->
+      <div class="card-box">
+        <div class="card-box-header">
+          <h2>🚀 Создать ретроспективу</h2>
+          <p>Выберите шаблон и настройте параметры встречи за 10 секунд</p>
+        </div>
+
+        <form id="create-room-form">
+          <div class="form-group">
+            <label for="room-title" class="form-label">Название встречи или спринта</label>
+            <input type="text" id="room-title" class="form-control" placeholder="Например: Ретро Спринта 42" required autocomplete="off">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" id="templates">Шаблон ретроспективы</label>
+            <div id="templates-list" class="templates-list">
+              <!-- Dynamically populated -->
+            </div>
+            <input type="hidden" id="selected-template" value="classic">
+          </div>
+
+          <div class="form-group" style="display: flex; gap: 16px;">
+            <div style="flex: 1;">
+              <label for="votes-limit" class="form-label">Голосов на человека</label>
+              <select id="votes-limit" class="form-control">
+                <option value="3">3 голоса</option>
+                <option value="5" selected>5 голосов (рекомендуется)</option>
+                <option value="8">8 голосов</option>
+                <option value="10">10 голосов</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">
+            Создать комнату и начать ретро →
+          </button>
+        </form>
+      </div>
+
+      <!-- Join or Recent Rooms Box -->
+      <div class="card-box">
+        <div class="card-box-header">
+          <h2>🔗 Войти по коду или ссылке</h2>
+          <p>Подключитесь к уже созданной доске команды</p>
+        </div>
+
+        <form id="join-room-form" style="margin-bottom: 28px;">
+          <div class="form-group">
+            <input type="text" id="join-room-input" class="form-control" placeholder="Код комнаты или ссылка..." required autocomplete="off">
+          </div>
+          <button type="submit" class="btn btn-secondary" style="width: 100%;">
+            Присоединиться к доске
+          </button>
+        </form>
+
+        <div class="card-box-header" style="margin-bottom: 12px;">
+          <h3 style="font-size: 1.1rem; display: flex; align-items: center; justify-content: space-between;">
+            <span>📁 Недавние доски</span>
+            <button id="refresh-rooms" class="btn btn-ghost btn-sm" title="Обновить список">🔄</button>
+          </h3>
+        </div>
+
+        <div id="recent-rooms-list" class="rooms-list">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+      <div class="hero-badge" style="display: block; width: fit-content; margin: 0 auto 16px;">✨ Всё для фасилитатора и команды</div>
+      <h2 style="text-align: center; font-size: 2rem; margin-bottom: 32px;">Создано практиками для практиков</h2>
+
+      <div class="features-grid">
+        <div class="feature-box">
+          <div class="feature-icon">🌡️</div>
+          <h3>Пульс настроения команды</h3>
+          <p>Ледокол в начале встречи: экспресс-оценка настроения спринта в 1 клик с моментальным подсчетом средней температуры команды.</p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon">🙈</div>
+          <h3>Приватный режим карточек</h3>
+          <p>Участники пишут мысли, не подглядывая в чужие карточки. Фасилитатор открывает их одновременно, исключая психологический конформизм.</p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon">⏱️</div>
+          <h3>Синхронный таймер со звуком</h3>
+          <p>Таймбоксинг для каждого этапа. Звуковые сигналы и анимация предупреждают участников за 30 секунд до конца фазы.</p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon">🗳️</div>
+          <h3>Точечное голосование (Dot Voting)</h3>
+          <p>Ограниченное число голосов у каждого участника помогает быстро подсветить самые острые проблемы для обсуждения.</p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon">🎯</div>
+          <h3>План действий (Action Items)</h3>
+          <p>Ни одно ретро не должно заканчиваться без договоренностей. Фиксируйте задачи с ответственными и сроками прямо во время встречи.</p>
+        </div>
+
+        <div class="feature-box">
+          <div class="feature-icon">📄</div>
+          <h3>Экспорт в Notion / Jira / Markdown</h3>
+          <p>Мгновенный экспорт результатов встречи в Markdown, CSV или готовый формат задач для копирования в мессенджер или таск-трекер.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast-container"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

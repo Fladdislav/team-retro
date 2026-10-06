@@ -1,0 +1,28 @@
+{
+  "name": "team-retro",
+  "version": "1.0.0",
+  "description": "Real-time collaborative retrospective board for agile teams",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "keywords": [
+    "retrospective",
+    "retro",
+    "agile",
+    "scrum",
+    "collaboration",
+    "realtime",
+    "socketio"
+  ],
+  "author": "Antigravity",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.2",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "socket.io-client": "^4.8.4"
+  }
+}

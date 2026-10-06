@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Командная ретроспектива — Team Retro</title>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/retro.css">
+  <link rel="stylesheet" href="css/modal.css">
+</head>
+<body class="retro-layout">
+
+  <!-- Main Top Bar -->
+  <header class="app-header">
+    <div style="display: flex; align-items: center; gap: 16px;">
+      <a href="index.html" class="logo-container" title="На главную">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </div>
+      </a>
+
+      <div class="room-title-area">
+        <span id="room-title-display" class="room-title-text">Загрузка...</span>
+        <button id="btn-edit-title" class="btn-edit-title" title="Переименовать ретроспективу">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Timer in Center -->
+    <div class="timer-widget" id="timer-widget">
+      <span id="timer-display" class="timer-display">05:00</span>
+      <div class="timer-controls">
+        <button id="btn-timer-toggle" class="btn btn-ghost btn-icon btn-sm" title="Старт / Пауза (Пробел)">
+          <span id="timer-toggle-icon">▶️</span>
+        </button>
+        <button id="btn-timer-add" class="btn btn-ghost btn-sm" title="+1 минута">+1м</button>
+        <button id="btn-timer-reset" class="btn btn-ghost btn-icon btn-sm" title="Сбросить таймер">🔄</button>
+      </div>
+    </div>
+
+    <!-- Right Header Controls -->
+    <div class="header-actions">
+      <!-- Remaining Votes Badge -->
+      <div id="votes-indicator" class="votes-badge" title="Ваши оставшиеся голоса на этапе голосования">
+        <span>🗳️ Голоса:</span>
+        <span id="remaining-votes-count">5 / 5</span>
+      </div>
+
+      <!-- Action Items Button -->
+      <button id="btn-open-actions" class="btn btn-secondary btn-sm" title="План действий">
+        <span>✅ Задачи</span>
+        <span id="actions-count-badge" class="col-count-badge">0</span>
+      </button>
+
+      <!-- Summary & Export Button -->
+      <button id="btn-open-summary" class="btn btn-secondary btn-sm" title="Итоги и экспорт">
+        <span>📊 Итоги</span>
+      </button>
+
+      <!-- Share Button -->
+      <button id="btn-share-room" class="btn btn-primary btn-sm" title="Скопировать ссылку для команды">
+        <span>🔗 Поделиться</span>
+      </button>
+
+      <!-- Participants Pile -->
+      <div id="participants-pile" class="participants-pile" title="Участники онлайн">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- User Profile Avatar Button -->
+      <button id="btn-user-profile" class="btn btn-ghost btn-icon" title="Мой профиль">
+        <span id="current-user-avatar" style="font-size: 1.25rem;">🦊</span>
+      </button>
+
+      <!-- Sound Toggle -->
+      <button id="btn-sound-toggle" class="btn btn-ghost btn-icon" title="Звуковые эффекты">
+        <span id="sound-icon">🔔</span>
+      </button>
+
+      <!-- Theme Toggle -->
+      <button id="btn-theme-toggle" class="btn btn-ghost btn-icon" title="Переключить тему">
+        <span id="theme-icon">☀️</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Subbar with Facilitator Stages & Controls -->
+  <div class="retro-subbar">
+    <!-- Stepper of stages -->
+    <div class="stages-stepper" id="stages-stepper">
+      <!-- Injected dynamically -->
+    </div>
+
+    <!-- Facilitator Toolbar -->
+    <div style="display: flex; align-items: center; gap: 8px;">
+      <button id="btn-toggle-blur" class="btn btn-secondary btn-sm" title="Скрыть/показать текст карточек, чтобы участники не списывали мысли">
+        <span id="blur-btn-icon">🙈</span>
+        <span id="blur-btn-text">Скрыть карточки</span>
+      </button>
+
+      <button id="btn-open-icebreaker" class="btn btn-secondary btn-sm" title="Опрос настроения команды">
+        <span>🌡️ Пульс настроения</span>
+      </button>
+
+      <button id="btn-add-column" class="btn btn-ghost btn-sm" title="Добавить новую колонку на доску">
+        <span>+ Колонка</span>
+      </button>
+
+      <button id="btn-confetti" class="btn btn-ghost btn-sm" title="Запустить праздничное конфетти для всей команды!">
+        <span>🎉 Праздновать!</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Retrospective Board Canvas -->
+  <main class="board-wrapper" id="board-columns-container">
+    <!-- Columns and cards rendered dynamically -->
+  </main>
+
+  <!-- DIALOG: User Profile -->
+  <dialog id="profile-dialog" closedby="any" aria-labelledby="profile-dialog-title">
+    <div class="modal-header">
+      <h3 id="profile-dialog-title">👤 Ваш профиль участника</h3>
+      <button class="btn-close-modal" data-close-dialog="profile-dialog">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="profile-name-input" class="form-label">Ваше имя или никнейм</label>
+        <input type="text" id="profile-name-input" class="form-control" placeholder="Иван Петров" maxlength="40">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Выберите аватар</label>
+        <div class="avatar-grid" id="avatar-choices">
+          <div class="avatar-choice selected" data-avatar="🦊">🦊</div>
+          <div class="avatar-choice" data-avatar="🚀">🚀</div>
+          <div class="avatar-choice" data-avatar="🐼">🐼</div>
+          <div class="avatar-choice" data-avatar="🦁">🦁</div>
+          <div class="avatar-choice" data-avatar="🦉">🦉</div>
+          <div class="avatar-choice" data-avatar="🦄">🦄</div>
+          <div class="avatar-choice" data-avatar="🐱">🐱</div>
+          <div class="avatar-choice" data-avatar="🤖">🤖</div>
+          <div class="avatar-choice" data-avatar="🐶">🐶</div>
+          <div class="avatar-choice" data-avatar="🐻">🐻</div>
+          <div class="avatar-choice" data-avatar="🦅">🦅</div>
+          <div class="avatar-choice" data-avatar="🐙">🐙</div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="btn-save-profile">Сохранить</button>
+    </div>
+  </dialog>
+
+  <!-- DIALOG: Icebreaker / Mood Check-in -->
+  <dialog id="icebreaker-dialog" closedby="any" aria-labelledby="icebreaker-dialog-title">
+    <div class="modal-header">
+      <h3 id="icebreaker-dialog-title">🌡️ Пульс команды (Ледокол)</h3>
+      <button class="btn-close-modal" data-close-dialog="icebreaker-dialog">✕</button>
+    </div>
+    <div class="modal-body">
+      <p id="icebreaker-question-text" style="color: var(--text-secondary); margin-bottom: 20px; font-weight: 500;">
+        Как прошёл этот спринт для вас лично? Оцените общее самочувствие и результаты:
+      </p>
+
+      <div class="mood-picker" id="mood-picker">
+        <div class="mood-option" data-mood="1" data-emoji="🌪️">
+          <span class="mood-emoji">🌪️</span>
+          <span class="mood-label">1. Хаос / Пожар</span>
+        </div>
+        <div class="mood-option" data-mood="2" data-emoji="😫">
+          <span class="mood-emoji">😫</span>
+          <span class="mood-label">2. Тяжело</span>
+        </div>
+        <div class="mood-option selected" data-mood="3" data-emoji="😐">
+          <span class="mood-emoji">😐</span>
+          <span class="mood-label">3. Нормально</span>
+        </div>
+        <div class="mood-option" data-mood="4" data-emoji="😊">
+          <span class="mood-emoji">😊</span>
+          <span class="mood-label">4. Хорошо</span>
+        </div>
+        <div class="mood-option" data-mood="5" data-emoji="🚀">
+          <span class="mood-emoji">🚀</span>
+          <span class="mood-label">5. Огонь / Топ</span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="icebreaker-note" class="form-label">Короткий комментарий (по желанию)</label>
+        <input type="text" id="icebreaker-note" class="form-control" placeholder="Что больше всего запомнилось или порадовало/огорчило...">
+      </div>
+
+      <div style="margin-bottom: 20px;">
+        <button class="btn btn-primary" id="btn-submit-icebreaker" style="width: 100%;">
+          Отправить оценку настроения
+        </button>
+      </div>
+
+      <h4 style="margin-bottom: 12px; font-size: 1rem;">Результаты команды в реальном времени:</h4>
+      <div class="mood-stats-box">
+        <div class="mood-stat-item">
+          <div class="mood-stat-value" id="mood-avg-score">—</div>
+          <div class="mood-stat-desc">Средний балл (из 5)</div>
+        </div>
+        <div class="mood-stat-item">
+          <div class="mood-stat-value" id="mood-responses-count">0</div>
+          <div class="mood-stat-desc">Ответили</div>
+        </div>
+      </div>
+
+      <div class="mood-answers-list" id="mood-answers-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-dialog="icebreaker-dialog">Закрыть</button>
+    </div>
+  </dialog>
+
+  <!-- DIALOG: Action Items Manager -->
+  <dialog id="actions-dialog" closedby="any" aria-labelledby="actions-dialog-title" style="max-width: 640px;">
+    <div class="modal-header">
+      <h3 id="actions-dialog-title">✅ План действий (Action Items)</h3>
+      <button class="btn-close-modal" data-close-dialog="actions-dialog">✕</button>
+    </div>
+    <div class="modal-body">
+      <form id="add-action-form" style="margin-bottom: 24px; background: var(--bg-tertiary); padding: 16px; border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+        <div class="form-group">
+          <label for="action-text-input" class="form-label">Что именно мы договорились сделать?</label>
+          <input type="text" id="action-text-input" class="form-control" placeholder="Конкретная договоренность или задача..." required>
+        </div>
+        <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+          <div style="flex: 1;">
+            <label for="action-assignee-input" class="form-label">Ответственный</label>
+            <input type="text" id="action-assignee-input" class="form-control" placeholder="Имя или @ник">
+          </div>
+          <div style="flex: 1;">
+            <label for="action-due-input" class="form-label">Срок выполнения</label>
+            <input type="date" id="action-due-input" class="form-control">
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">+ Зафиксировать задачу</button>
+      </form>
+
+      <div class="action-items-container" id="action-items-list">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-dialog="actions-dialog">Готово</button>
+    </div>
+  </dialog>
+
+  <!-- DIALOG: Summary & Analytics -->
+  <dialog id="summary-dialog" closedby="any" aria-labelledby="summary-dialog-title" style="max-width: 720px;">
+    <div class="modal-header">
+      <h3 id="summary-dialog-title">📊 Итоги и экспорт ретроспективы</h3>
+      <button class="btn-close-modal" data-close-dialog="summary-dialog">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="summary-grid">
+        <div class="summary-card">
+          <div class="summary-card-number" id="sum-cards-count">0</div>
+          <div class="summary-card-label">Всего мыслей</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-number" id="sum-votes-count">0</div>
+          <div class="summary-card-label">Отдано голосов</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-number" id="sum-actions-count">0</div>
+          <div class="summary-card-label">Action Items</div>
+        </div>
+        <div class="summary-card">
+          <div class="summary-card-number" id="sum-mood-avg">—</div>
+          <div class="summary-card-label">Пульс настроения</div>
+        </div>
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap;">
+        <button class="btn btn-secondary btn-sm" id="btn-copy-md">📋 Скопировать Markdown</button>
+        <button class="btn btn-secondary btn-sm" id="btn-copy-jira">📋 Скопировать для Jira / Confluence</button>
+        <button class="btn btn-secondary btn-sm" id="btn-download-md">💾 Скачать .MD</button>
+        <button class="btn btn-secondary btn-sm" id="btn-download-csv">📊 Скачать .CSV (Excel)</button>
+      </div>
+
+      <div class="form-label">Предпросмотр отчета (Markdown):</div>
+      <div class="export-code-box" id="summary-markdown-preview"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" id="btn-finish-retro-celebrate">🎉 Завершить ретро и отпраздновать!</button>
+      <button class="btn btn-secondary" data-close-dialog="summary-dialog">Закрыть</button>
+    </div>
+  </dialog>
+
+  <!-- DIALOG: Add Column -->
+  <dialog id="add-column-dialog" closedby="any" aria-labelledby="col-dialog-title">
+    <div class="modal-header">
+      <h3 id="col-dialog-title">➕ Добавить новую колонку</h3>
+      <button class="btn-close-modal" data-close-dialog="add-column-dialog">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label for="new-col-title" class="form-label">Заголовок колонки</label>
+        <input type="text" id="new-col-title" class="form-control" placeholder="Например: Эксперименты 🧪" required>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Цвет колонки</label>
+        <select id="new-col-color" class="form-control">
+          <option value="emerald">Изумрудный (Зеленый)</option>
+          <option value="rose">Розовый / Красный</option>
+          <option value="amber">Янтарный (Желтый)</option>
+          <option value="indigo" selected>Индиго (Синий)</option>
+          <option value="cyan">Бирюзовый (Cyan)</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" data-close-dialog="add-column-dialog">Отмена</button>
+      <button class="btn btn-primary" id="btn-confirm-add-column">Создать колонку</button>
+    </div>
+  </dialog>
+
+  <!-- DIALOG: Edit Card -->
+  <dialog id="edit-card-dialog" closedby="any" aria-labelledby="edit-card-dialog-title">
+    <div class="modal-header">
+      <h3 id="edit-card-dialog-title">✏️ Редактировать карточку</h3>
+      <button class="btn-close-modal" data-close-dialog="edit-card-dialog">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-card-id">
+      <div class="form-group">
+        <label for="edit-card-text" class="form-label">Текст карточки</label>
+        <textarea id="edit-card-text" class="form-control" rows="4" style="resize: vertical;"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Теги</label>
+        <div class="tags-selector" id="edit-card-tags">
+          <!-- Rendered dynamically -->
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer" style="justify-content: space-between;">
+      <button class="btn btn-danger btn-sm" id="btn-delete-card">🗑️ Удалить</button>
+      <div style="display: flex; gap: 8px;">
+        <button class="btn btn-secondary btn-sm" data-close-dialog="edit-card-dialog">Отмена</button>
+        <button class="btn btn-primary btn-sm" id="btn-save-card">Сохранить</button>
+      </div>
+    </div>
+  </dialog>
+
+  <!-- DIALOG: Group Cards -->
+  <dialog id="group-card-dialog" closedby="any" aria-labelledby="group-card-dialog-title">
+    <div class="modal-header">
+      <h3 id="group-card-dialog-title">🗂️ Объединение карточек в группу</h3>
+      <button class="btn-close-modal" data-close-dialog="group-card-dialog">✕</button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="group-source-card-id">
+      <input type="hidden" id="group-target-card-id">
+      <p style="color: var(--text-secondary); margin-bottom: 16px; font-size: 0.9rem;">
+        Объединить эти две карточки в общую тему для обсуждения:
+      </p>
+      <div class="form-group">
+        <label for="group-title-input" class="form-label">Название общей темы</label>
+        <input type="text" id="group-title-input" class="form-control" placeholder="Например: Проблемы с CI/CD" required>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary btn-sm" data-close-dialog="group-card-dialog">Отмена</button>
+      <button class="btn btn-primary btn-sm" id="btn-confirm-group-cards">Объединить</button>
+    </div>
+  </dialog>
+
+  <!-- Toast Container -->
+  <div id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="/socket.io/socket.io.js" onerror="this.onerror=null;this.src='https://cdn.socket.io/4.8.1/socket.io.min.js';"></script>
+  <script src="js/sound.js"></script>
+  <script src="js/confetti.js"></script>
+  <script src="js/export.js"></script>
+  <script src="js/retro.js"></script>
+</body>
+</html>
